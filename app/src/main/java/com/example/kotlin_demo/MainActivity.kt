@@ -52,7 +52,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Send data to webview through function updateFromNative.
+     * Send data to webView through function updateFromNative.
      */
     private fun sendDataToWebView(webView: WebView){
         webView.evaluateJavascript("javascript: updateFromNative('')",null)
