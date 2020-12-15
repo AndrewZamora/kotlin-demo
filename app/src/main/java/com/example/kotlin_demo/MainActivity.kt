@@ -1,11 +1,16 @@
 package com.example.kotlin_demo
 
+import android.content.Intent
+import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.TextView
@@ -20,7 +25,7 @@ class MainActivity : AppCompatActivity() {
         val webView = findViewById<WebView>(R.id.webView)
 
         webView.webViewClient = WebViewClient()
-        webView.loadUrl("http://10.0.2.2:5500")
+
         webView.settings.javaScriptEnabled = true
 
         findViewById<FloatingActionButton>(R.id.fab).setOnClickListener { view ->
@@ -32,7 +37,21 @@ class MainActivity : AppCompatActivity() {
             sendDataToWebView(webView)
         }
 
+        webView.webViewClient = object : WebViewClient() {
 
+            override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+                val url = request?.url.toString()
+                if(!url.contains("5500")) {
+                    webView.stopLoading()
+                    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                    startActivity(browserIntent)
+                } else {
+                    return super.shouldOverrideUrlLoading(view, request)
+                }
+                return true
+            }
+        }
+         webView.loadUrl("http://10.0.2.2:5500")
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -56,5 +75,14 @@ class MainActivity : AppCompatActivity() {
      */
     private fun sendDataToWebView(webView: WebView){
         webView.evaluateJavascript("javascript: updateFromNative('')",null)
+    }
+
+    override fun onBackPressed() {
+        var webView = findViewById<WebView>(R.id.webView)
+            if (webView.canGoBack()) {
+                webView.goBack()
+            } else {
+                super.onBackPressed()
+            }
     }
 }
