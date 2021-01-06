@@ -1,8 +1,14 @@
 package com.example.kotlin_demo
 
+import android.app.Activity
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -13,7 +19,9 @@ import android.view.MenuItem
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.Button
 import android.widget.TextView
+import androidx.core.app.NotificationCompat
 import org.w3c.dom.Text
 
 class MainActivity : AppCompatActivity() {
@@ -37,23 +45,36 @@ class MainActivity : AppCompatActivity() {
             sendDataToWebView(webView)
         }
 
+        findViewById<Button>(R.id.button3).setOnClickListener { view->
+            showNotification("Test Content", "A fake notification.")
+        }
+
         webView.webViewClient = object : WebViewClient() {
 
-            override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-                val url = request?.url.toString()
-                if(!url.contains("5500")) {
-                    webView.stopLoading()
-                    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                    startActivity(browserIntent)
-                } else {
-                    return super.shouldOverrideUrlLoading(view, request)
-                }
-                return true
-            }
+//            override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
+//                val url = request?.url.toString()
+//                if(!url.contains("5500")) {
+//                    webView.stopLoading()
+//                    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+//                    startActivity(browserIntent)
+//                } else {
+//                    return super.shouldOverrideUrlLoading(view, request)
+//                }
+//                return true
+//            }
         }
          webView.loadUrl("http://10.0.2.2:5500")
+
     }
 
+    override fun onNewIntent(intent: Intent?) {
+        val url = intent?.getStringExtra("URL")
+        if(url != null) {
+            var webView = findViewById<WebView>(R.id.webView)
+            webView.loadUrl(url)
+        }
+        super.onNewIntent(intent)
+    }
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
@@ -85,4 +106,29 @@ class MainActivity : AppCompatActivity() {
                 super.onBackPressed()
             }
     }
+
+    private fun showNotification(textContent: String, textTitle: String) {
+        val intent = Intent(this, MainActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP )
+        intent.putExtra("URL", "https://www.google.com")
+        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val channelId = "Default"
+        val notificationBuilder = NotificationCompat.Builder(this, channelId)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(textContent)
+                .setContentText(textTitle)
+                .setAutoCancel(true)
+                .setContentIntent(pendingIntent)
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        // Since android Oreo notification channel is needed.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(channelId,
+                    "Channel human readable title",
+                    NotificationManager.IMPORTANCE_DEFAULT)
+            notificationManager.createNotificationChannel(channel)
+        }
+        notificationManager.notify(0 /* ID of notification */, notificationBuilder.build())
+    }
+
 }
