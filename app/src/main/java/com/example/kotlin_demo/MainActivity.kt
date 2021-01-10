@@ -23,6 +23,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.core.app.NotificationCompat
 import org.w3c.dom.Text
+import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
 
@@ -128,7 +129,9 @@ class MainActivity : AppCompatActivity() {
                     NotificationManager.IMPORTANCE_DEFAULT)
             notificationManager.createNotificationChannel(channel)
         }
-        notificationManager.notify(0 /* ID of notification */, notificationBuilder.build())
+        // Not the best way to create a unique ID but a unique ID is needed to prevent the last notification from being overwritten
+        val uniqueId = Random(System.currentTimeMillis()).nextInt(1000)
+        notificationManager.notify(uniqueId/* ID of notification */, notificationBuilder.build())
     }
 
 }
