@@ -1,28 +1,20 @@
 package com.example.kotlin_demo
 
-import android.app.Activity
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
-import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Button
-import android.widget.TextView
 import androidx.core.app.NotificationCompat
-import org.w3c.dom.Text
 import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
@@ -47,7 +39,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.button3).setOnClickListener { view->
-            showNotification("Test Content", "A fake notification.")
+            showDefaultNotification("Test Content", "A fake notification.", "Default")
         }
 
         webView.webViewClient = object : WebViewClient() {
@@ -65,7 +57,8 @@ class MainActivity : AppCompatActivity() {
 //            }
         }
          webView.loadUrl("http://10.0.2.2:5500")
-
+//        Handle Notification Channel
+        createNotificationChannel("Default")
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -108,20 +101,8 @@ class MainActivity : AppCompatActivity() {
             }
     }
 
-    private fun showNotification(textContent: String, textTitle: String) {
-        val intent = Intent(this, MainActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP )
-        intent.putExtra("URL", "https://www.google.com")
-        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
-        val channelId = "Default"
-        val notificationBuilder = NotificationCompat.Builder(this, channelId)
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentTitle(textContent)
-                .setContentText(textTitle)
-                .setAutoCancel(true)
-                .setContentIntent(pendingIntent)
+    private fun createNotificationChannel(channelId: String) {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
         // Since android Oreo notification channel is needed.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(channelId,
@@ -129,9 +110,28 @@ class MainActivity : AppCompatActivity() {
                     NotificationManager.IMPORTANCE_DEFAULT)
             notificationManager.createNotificationChannel(channel)
         }
+
+    }
+
+    private fun showDefaultNotification(textContent: String, textTitle: String, channelId: String) {
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val intent = Intent(this, MainActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP )
+        intent.putExtra("URL", "https://www.google.com")
+        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val notificationBuilder = NotificationCompat.Builder(this, channelId)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(textContent)
+                .setContentText(textTitle)
+                .setAutoCancel(true)
+                .setContentIntent(pendingIntent)
         // Not the best way to create a unique ID but a unique ID is needed to prevent the last notification from being overwritten
         val uniqueId = Random(System.currentTimeMillis()).nextInt(1000)
         notificationManager.notify(uniqueId/* ID of notification */, notificationBuilder.build())
+    }
+
+    private fun showNotificationWithCustomTemplate() {
+
     }
 
 }
