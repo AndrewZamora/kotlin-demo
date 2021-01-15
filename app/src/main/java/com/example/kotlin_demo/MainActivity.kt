@@ -5,6 +5,8 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Bundle
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -16,6 +18,9 @@ import android.webkit.WebViewClient
 import android.widget.Button
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
+import java.io.IOException
+import java.net.HttpURLConnection
+import java.net.URL
 import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
@@ -41,7 +46,7 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.button3).setOnClickListener { view->
 //            showDefaultNotification("Test Content", "A fake notification.", "Default")
-            showNotificationWithCustomTemplate("test", "test", "Default")
+            showNotificationWithCustomTemplate("This is a custom notification", "test", "Default")
         }
 
         webView.webViewClient = object : WebViewClient() {
@@ -115,6 +120,18 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    private  fun getBitmapFromUrl(url:String): Bitmap? {
+        return try {
+            val connection = URL(url).openConnection() as HttpURLConnection
+            connection.doInput = true
+            connection.connect()
+            val input = connection.inputStream
+            BitmapFactory.decodeStream(input)
+        } catch (e: IOException) {
+            null
+        }
+    }
+
     private fun showDefaultNotification(textContent: String, textTitle: String, channelId: String) {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val intent = Intent(this, MainActivity::class.java)
@@ -140,13 +157,18 @@ class MainActivity : AppCompatActivity() {
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val intent = Intent(this, MainActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP )
-        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val image = getBitmapFromUrl("https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/001_Tacos_de_carnitas%2C_carne_asada_y_al_pastor.jpg/440px-001_Tacos_de_carnitas%2C_carne_asada_y_al_pastor.jpg")
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
+                notificationBuilder
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setStyle(NotificationCompat.DecoratedCustomViewStyle())
                 .setCustomContentView(notificationLayout)
                 .setCustomBigContentView(notificationLayoutExpanded)
+        if(image != null) {
 
+        }
+        notificationLayout.setTextViewText(R.id.custom_notification_small_text, textContent)
+        notificationLayoutExpanded.setTextViewText(R.id.custom_notification_large_text, textContent)
         // Not the best way to create a unique ID but a unique ID is needed to prevent the last notification from being overwritten
         val uniqueId = Random(System.currentTimeMillis()).nextInt(1000)
         notificationManager.notify(uniqueId/* ID of notification */, notificationBuilder.build())
