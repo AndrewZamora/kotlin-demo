@@ -14,6 +14,7 @@ import android.view.MenuItem
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Button
+import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import kotlin.random.Random
 
@@ -39,7 +40,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.button3).setOnClickListener { view->
-            showDefaultNotification("Test Content", "A fake notification.", "Default")
+//            showDefaultNotification("Test Content", "A fake notification.", "Default")
+            showNotificationWithCustomTemplate("test", "test", "Default")
         }
 
         webView.webViewClient = object : WebViewClient() {
@@ -130,8 +132,23 @@ class MainActivity : AppCompatActivity() {
         notificationManager.notify(uniqueId/* ID of notification */, notificationBuilder.build())
     }
 
-    private fun showNotificationWithCustomTemplate() {
+    private fun showNotificationWithCustomTemplate(textContent: String, textTitle: String, channelId: String) {
+    // https://developer.android.com/training/notify-user/custom-notification#kotlin
+    // RemoteViews doesn't support constraint layouts see: https://developer.android.com/reference/android/widget/RemoteViews
+        val notificationLayout = RemoteViews(packageName, R.layout.custom_notification_small)
+        val notificationLayoutExpanded = RemoteViews(packageName, R.layout.custom_notification_large)
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val intent = Intent(this, MainActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP )
+        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val notificationBuilder = NotificationCompat.Builder(this, channelId)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+                .setCustomContentView(notificationLayout)
+                .setCustomBigContentView(notificationLayoutExpanded)
 
+        // Not the best way to create a unique ID but a unique ID is needed to prevent the last notification from being overwritten
+        val uniqueId = Random(System.currentTimeMillis()).nextInt(1000)
+        notificationManager.notify(uniqueId/* ID of notification */, notificationBuilder.build())
     }
-
 }

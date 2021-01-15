@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="265dp">
+    <TextView
+        android:id="@+id/custom_notification_large_text"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="This is expanded"
+        android:textAlignment="textStart"
+        android:padding="20dp"
+        style="@style/TextAppearance.Compat.Notification"
+        />
+    <ImageView
+        android:id="@+id/custom_notification_large_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"/>
+</LinearLayout>
