@@ -18,6 +18,10 @@ import android.webkit.WebViewClient
 import android.widget.Button
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
@@ -46,7 +50,7 @@ class MainActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.button3).setOnClickListener { view->
 //            showDefaultNotification("Test Content", "A fake notification.", "Default")
-            showNotificationWithCustomTemplate("This is a custom notification", "test", "Default")
+            showNotificationWithCustomTemplate("Kotlin-Demo", "test", "Default")
         }
 
         webView.webViewClient = object : WebViewClient() {
@@ -120,9 +124,9 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private  fun getBitmapFromUrl(url:String): Bitmap? {
+    private fun getBitmapFromUrl(test:String): Bitmap? {
         return try {
-            val connection = URL(url).openConnection() as HttpURLConnection
+            val connection = URL(test).openConnection() as HttpURLConnection
             connection.doInput = true
             connection.connect()
             val input = connection.inputStream
@@ -150,27 +154,34 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showNotificationWithCustomTemplate(textContent: String, textTitle: String, channelId: String) {
-    // https://developer.android.com/training/notify-user/custom-notification#kotlin
-    // RemoteViews doesn't support constraint layouts see: https://developer.android.com/reference/android/widget/RemoteViews
-        val notificationLayout = RemoteViews(packageName, R.layout.custom_notification_small)
-        val notificationLayoutExpanded = RemoteViews(packageName, R.layout.custom_notification_large)
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val self = this
         val intent = Intent(this, MainActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP )
-        val image = getBitmapFromUrl("https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/001_Tacos_de_carnitas%2C_carne_asada_y_al_pastor.jpg/440px-001_Tacos_de_carnitas%2C_carne_asada_y_al_pastor.jpg")
-        val notificationBuilder = NotificationCompat.Builder(this, channelId)
-                notificationBuilder
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setStyle(NotificationCompat.DecoratedCustomViewStyle())
-                .setCustomContentView(notificationLayout)
-                .setCustomBigContentView(notificationLayoutExpanded)
-        if(image != null) {
-
+        CoroutineScope(IO).launch {
+            val image = async { getBitmapFromUrl("https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/001_Tacos_de_carnitas%2C_carne_asada_y_al_pastor.jpg/330px-001_Tacos_de_carnitas%2C_carne_asada_y_al_pastor.jpg")}.await()
+            // https://developer.android.com/training/notify-user/custom-notification#kotlin
+            // RemoteViews doesn't support constraint layouts see: https://developer.android.com/reference/android/widget/RemoteViews
+            val notificationLayout = RemoteViews(packageName, R.layout.custom_notification_small)
+            val notificationLayoutExpanded = RemoteViews(packageName, R.layout.custom_notification_large)
+            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP )
+            val notificationBuilder = NotificationCompat.Builder(self, channelId)
+            notificationBuilder
+                    .setSmallIcon(R.mipmap.ic_launcher)
+//                    .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+                    .setCustomContentView(notificationLayout)
+//                    .setCustomBigContentView(notificationLayoutExpanded)
+            // Add custom text
+            notificationLayout.setTextViewText(R.id.custom_notification_small_text, textContent)
+            notificationLayoutExpanded.setTextViewText(R.id.custom_notification_large_text, textContent)
+            // Add custom image
+            notificationLayoutExpanded.setImageViewBitmap(R.id.custom_notification_large_image,image)
+            notificationLayout.setImageViewBitmap(R.id.custom_notification_large_image,image)
+            // Not the best way to create a unique ID but a unique ID is needed to prevent the last notification from being overwritten
+            val uniqueId = Random(System.currentTimeMillis()).nextInt(1000)
+            notificationManager.notify(uniqueId/* ID of notification */, notificationBuilder.build())
         }
-        notificationLayout.setTextViewText(R.id.custom_notification_small_text, textContent)
-        notificationLayoutExpanded.setTextViewText(R.id.custom_notification_large_text, textContent)
-        // Not the best way to create a unique ID but a unique ID is needed to prevent the last notification from being overwritten
-        val uniqueId = Random(System.currentTimeMillis()).nextInt(1000)
-        notificationManager.notify(uniqueId/* ID of notification */, notificationBuilder.build())
+
+
     }
+
 }
