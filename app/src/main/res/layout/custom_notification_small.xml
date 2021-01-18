@@ -19,20 +19,39 @@
             <ImageView
                 android:layout_width="19dp"
                 android:layout_height="19dp"
-                android:paddingRight="5dp"
+                android:layout_marginRight="10dp"
                 android:src="@mipmap/ic_launcher"></ImageView>
             <TextView
                 android:id="@+id/custom_notification_small_text"
-                style="@style/TextAppearance.Compat.Notification.Title"
+                style="@style/TextAppearance.Compat.Notification.Info"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:text="Message"
+                android:layout_marginRight="5dp"
+                />
+            <TextView
+                android:id="@+id/custom_notification_small_bullet_point"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/TextAppearance.Compat.Notification.Info"
+                android:text="\u2022"
+                android:layout_marginRight="5dp"
+                />
+            <TextView
+                android:id="@+id/custom_notification_small_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/TextAppearance.Compat.Notification.Time"
+                android:text="9:00"
                 />
         </LinearLayout>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="This is stuff">
+            style="@style/TextAppearance.Compat.Notification.Line2"
+            android:text="This is stuff"
+            android:ellipsize="end"
+            android:singleLine="false">
         </TextView>
 
     </LinearLayout>
