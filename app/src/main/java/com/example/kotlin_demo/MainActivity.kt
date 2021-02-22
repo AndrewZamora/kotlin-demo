@@ -1,5 +1,6 @@
 package com.example.kotlin_demo
 
+import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -29,6 +30,7 @@ import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
 
+    @SuppressLint("JavascriptInterface")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -38,7 +40,7 @@ class MainActivity : AppCompatActivity() {
         webView.webViewClient = WebViewClient()
 
         webView.settings.javaScriptEnabled = true
-
+        webView.addJavascriptInterface(JSBridge(this@MainActivity),"JSBridge")
         findViewById<FloatingActionButton>(R.id.fab).setOnClickListener { view ->
 //            val textDisplayedValue = findViewById<TextView>(R.id.textDisplayedValue)
 //            val originalValue: Int = textDisplayedValue.text.toString().toInt()
@@ -104,7 +106,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        var webView = findViewById<WebView>(R.id.webView)
+        val webView = findViewById<WebView>(R.id.webView)
             if (webView.canGoBack()) {
                 webView.goBack()
             } else {
@@ -185,3 +187,4 @@ class MainActivity : AppCompatActivity() {
     }
 
 }
+
