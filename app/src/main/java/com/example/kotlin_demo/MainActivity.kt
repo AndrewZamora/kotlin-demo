@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
@@ -19,6 +20,7 @@ import android.webkit.WebViewClient
 import android.widget.Button
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
+import androidx.media.MediaBrowserServiceCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.async
@@ -72,6 +74,7 @@ class MainActivity : AppCompatActivity() {
          webView.loadUrl("http://10.0.2.2:5500")
 //        Handle Notification Channel
         createNotificationChannel("Default")
+
     }
 
     override fun onNewIntent(intent: Intent?) {
