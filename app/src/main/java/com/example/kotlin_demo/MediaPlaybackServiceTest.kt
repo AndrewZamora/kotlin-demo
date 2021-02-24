@@ -27,7 +27,7 @@ class MediaPlaybackServiceTest: MediaBrowserServiceCompat() {
                     or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
             )
 
-            // Set an initial PlaybackState with ACTION_PLAY, so media buttons can start the player
+            // Set an initial PlaybackState with ACTION_PLAY, so media buttons can start the Player
             stateBuilder = PlaybackStateCompat.Builder()
                 .setActions(PlaybackStateCompat.ACTION_PLAY
                         or PlaybackStateCompat.ACTION_PLAY_PAUSE

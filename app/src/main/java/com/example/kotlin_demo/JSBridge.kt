@@ -6,47 +6,32 @@ import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
 import android.webkit.JavascriptInterface
+import android.webkit.WebView
 
 class JSBridge(private val activity: MainActivity ) {
     private var mediaPlayer : MediaPlayer? = null
+
     @JavascriptInterface
     fun playAudioFromUrl(URL:String) {
         Intent(activity, AudioPlayer::class.java).also {
+            it.putExtra("URL", URL)
+            it.putExtra("ACTION", "play")
             activity.startService(it)
         }
-        if(mediaPlayer == null) {
-            mediaPlayer = MediaPlayer().apply {
-            setAudioAttributes(
-            AudioAttributes.Builder()
-                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                .setUsage(AudioAttributes.USAGE_MEDIA)
-                .build()
-            )
-            setDataSource(activity, Uri.parse(URL))
-            prepare()
-            start()
-            }
-            mediaPlayer!!.setOnCompletionListener {
-                stopMediaPlayer()
-            }
-        }
-        mediaPlayer?.start()
     }
 
     @JavascriptInterface
     fun pauseAudio() {
-        mediaPlayer?.pause()
+        Intent(activity, AudioPlayer::class.java).also {
+            it.putExtra("ACTION", "pause")
+            activity.startService(it)
+        }
     }
 
     @JavascriptInterface
     fun stopAudio() {
-        stopMediaPlayer()
-    }
-
-    private fun stopMediaPlayer() {
-        if(mediaPlayer != null) {
-            mediaPlayer?.release()
-            mediaPlayer = null
+        Intent(activity, AudioPlayer::class.java).also {
+            activity.stopService(it)
         }
     }
 }
