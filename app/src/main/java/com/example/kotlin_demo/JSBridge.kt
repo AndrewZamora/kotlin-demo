@@ -13,11 +13,21 @@ class JSBridge(private val activity: MainActivity ) {
 
     @JavascriptInterface
     fun playAudioFromUrl(URL:String) {
-        Intent(activity, AudioPlayer::class.java).also {
+        Intent(activity, AudioService2::class.java).also {
             it.putExtra("URL", URL)
             it.putExtra("ACTION", "play")
-            activity.startService(it)
+            activity.startForegroundService(it)
         }
+//        Intent(activity, MediaPlaybackServiceTest::class.java).also {
+//            it.putExtra("URL", URL)
+//            it.putExtra("ACTION", "play")
+//            activity.startService(it)
+//        }
+//        Intent(activity, AudioPlayer::class.java).also {
+//            it.putExtra("URL", URL)
+//            it.putExtra("ACTION", "play")
+//            activity.startService(it)
+//        }
     }
 
     @JavascriptInterface
@@ -30,8 +40,12 @@ class JSBridge(private val activity: MainActivity ) {
 
     @JavascriptInterface
     fun stopAudio() {
-        Intent(activity, AudioPlayer::class.java).also {
+        Intent(activity, MediaPlaybackServiceTest::class.java).also {
+            it.putExtra("ACTION", "stop")
             activity.stopService(it)
         }
+//        Intent(activity, AudioPlayer::class.java).also {
+//            activity.stopService(it)
+//        }
     }
 }

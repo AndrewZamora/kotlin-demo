@@ -9,4 +9,6 @@
 
     <string name="hello_first_fragment">1</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="notification_channel_name">Audio Channel</string>
+    <string name="notification_channel_description">Displays Currently Playing Audio</string>
 </resources>

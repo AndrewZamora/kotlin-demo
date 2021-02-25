@@ -1,110 +1,123 @@
 package com.example.kotlin_demo
 
-import android.app.Activity
-import android.graphics.ColorSpace
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
 import android.media.AudioAttributes
+import android.media.AudioManager
 import android.media.MediaPlayer
 import android.media.browse.MediaBrowser
 import android.net.Uri
 import android.os.Bundle
+import android.os.ResultReceiver
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.media.MediaBrowserServiceCompat
+import java.util.prefs.NodeChangeListener
 
 
-class MediaPlaybackServiceTest: MediaBrowserServiceCompat() {
+class MediaPlaybackServiceTest: MediaBrowserServiceCompat(){
     private  var mediaSession: MediaSessionCompat? = null
     private lateinit var stateBuilder: PlaybackStateCompat.Builder
     private var mediaPlayer : MediaPlayer? = null
+    private var audioManager : AudioManager? = null
+    private val noisyReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if(mediaPlayer?.isPlaying == true) {
+               mediaPlayer?.pause()
+            }
+        }
+    }
+
+    fun sucessfullyGetAudioFocus (){
+        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
+    }
+
+
+    init {
+        Log.d(SERVICE_TAG, "MediaPlaybackServiceTest service is running")
+    }
+
 
     override fun onCreate() {
+        Log.d(SERVICE_TAG, "OnCreate")
         super.onCreate()
-        mediaSession = MediaSessionCompat(baseContext, "Audio Service").apply {
-            // Enable callbacks from MediaButtons and TransportControls
-            setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS
-                    or MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
-            )
-
-            // Set an initial PlaybackState with ACTION_PLAY, so media buttons can start the Player
+        mediaSession = MediaSessionCompat(this@MediaPlaybackServiceTest, "MediaPlaybackServiceTest").apply {
+            // Set an initial PlaybackState with ACTION_PLAY, so media buttons can start the player
             stateBuilder = PlaybackStateCompat.Builder()
                 .setActions(PlaybackStateCompat.ACTION_PLAY
                         or PlaybackStateCompat.ACTION_PLAY_PAUSE
                 )
             setPlaybackState(stateBuilder.build())
-
             // MySessionCallback() has methods that handle callbacks from a media controller
-            setCallback(MySessionCallback())
 
+            setCallback(MySessionCallback())
             // Set the session's token so that client activities can communicate with it.
             setSessionToken(sessionToken)
         }
 
     }
-    
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.d(SERVICE_TAG, "OnStartCommand")
+        mediaPlayer = MediaPlayer().apply {
+            setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .build()
+            )
+           val URL = "test"
+            setDataSource(this@MediaPlaybackServiceTest, Uri.parse(URL))
+            prepare()
+            start()
+        }
+        return super.onStartCommand(intent, flags, startId)
+    }
+
     override fun onLoadChildren(
         parentId: String,
         result: Result<MutableList<MediaBrowserCompat.MediaItem>>
     ) {
-        result.sendResult(null)
+        TODO("Not yet implemented")
     }
+
     override fun onGetRoot(
         clientPackageName: String,
         clientUid: Int,
         rootHints: Bundle?
     ): BrowserRoot? {
-       return BrowserRoot("empty_root", null)
+        TODO("Not yet implemented")
     }
 
     override fun onDestroy() {
-        mediaSession?.release()
         super.onDestroy()
+        Log.d(SERVICE_TAG, "Stopped Session")
     }
-    private fun stopMediaPlayer() {
-        if(mediaPlayer != null) {
-            mediaPlayer?.release()
-            mediaPlayer = null
-        }
-    }
-    private inner class MySessionCallback: MediaSessionCompat.Callback() {
-         fun onPlay(activity: Activity, URL: String) {
-            if(mediaPlayer == null) {
-                mediaPlayer = MediaPlayer().apply {
-                    setAudioAttributes(
-                        AudioAttributes.Builder()
-                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                            .setUsage(AudioAttributes.USAGE_MEDIA)
-                            .build()
-                    )
-                    setDataSource(activity, Uri.parse(URL))
-                    prepare()
-                    start()
-                }
-                mediaPlayer!!.setOnCompletionListener {
-                    stopMediaPlayer()
-                }
-            }
-            mediaPlayer?.start()
+
+    inner class MySessionCallback() : MediaSessionCompat.Callback(){
+        override fun onMediaButtonEvent(mediaButtonEvent: Intent?): Boolean {
+            return super.onMediaButtonEvent(mediaButtonEvent)
         }
 
-        override fun onSkipToQueueItem(queueId: Long) {}
+        override fun onPlay () {
 
-        override fun onSeekTo(position: Long) {}
+            super.onPlay()
+        }
 
-        override fun onPlayFromMediaId(mediaId: String?, extras: Bundle?) {}
+        override fun onStop() {
+            super.onStop()
+        }
 
-        override fun onPause() {}
-
-        override fun onStop() {}
-
-        override fun onSkipToNext() {}
-
-        override fun onSkipToPrevious() {}
-
-        override fun onCustomAction(action: String?, extras: Bundle?) {}
-
-        override fun onPlayFromSearch(query: String?, extras: Bundle?) {}
+        override fun onPause() {
+            super.onPause()
+        }
+    }
+    companion object {
+        const val SERVICE_TAG = "MediaPlaybackServiceTest"
     }
 }
 
