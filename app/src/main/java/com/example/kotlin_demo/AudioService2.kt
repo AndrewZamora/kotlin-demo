@@ -57,7 +57,6 @@ class AudioService2: MediaBrowserServiceCompat() {
         player.playWhenReady = true
         mediaSessionConnector = MediaSessionConnector(mediaSession)
         mediaSessionConnector.setPlayer(player)
-
         playerNotificationManager = PlayerNotificationManager.createWithNotificationChannel(
             this,
             PLAYBACK_CHANNEL_ID,
@@ -70,7 +69,7 @@ class AudioService2: MediaBrowserServiceCompat() {
                     return PendingIntent.getActivity(this@AudioService2, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
                 }
 
-                override fun getCurrentContentText(player: Player): CharSequence? {
+                override fun getCurrentContentText(player: Player): CharSequence {
                     return "test"
                 }
 
@@ -90,14 +89,16 @@ class AudioService2: MediaBrowserServiceCompat() {
                     notificationId: Int,
                     notification: Notification
                 ) {
+                    Log.d(SERVICE_TAG, "notification started")
                     startForeground(notificationId,notification)
                 }
                 override fun onNotificationCancelled(
                     notificationId: Int,
                     dismissedByUser: Boolean
                 ) {
-                    super.onNotificationCancelled(notificationId, dismissedByUser)
                     stopSelf()
+                    Log.d(SERVICE_TAG, "notification cancel")
+                    super.onNotificationCancelled(notificationId, dismissedByUser)
                 }
 
                 override fun onNotificationPosted(
@@ -105,14 +106,23 @@ class AudioService2: MediaBrowserServiceCompat() {
                     notification: Notification,
                     ongoing: Boolean
                 ) {
-                    super.onNotificationPosted(notificationId, notification, ongoing)
+//                    super.onNotificationPosted(notificationId, notification, ongoing)
+                    if(ongoing) {
+                        startForeground(notificationId, notification)
+                    } else {
+                        stopForeground(false)
+                    }
+                    Log.d(SERVICE_TAG, "notification posted")
                 }
             }
 
 
         )
+        playerNotificationManager.setSmallIcon(R.drawable.ic_launcher_foreground)
         playerNotificationManager.setPlayer(player)
-
+        playerNotificationManager.setMediaSessionToken(sessionToken!!)
+        mediaSessionConnector = MediaSessionConnector(mediaSession)
+        mediaSessionConnector.setPlayer(player)
     }
     // LIFECYCLE METHODS
     override fun onCreate() {
