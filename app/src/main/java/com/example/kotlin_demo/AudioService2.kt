@@ -1,15 +1,21 @@
 package com.example.kotlin_demo
 
 import android.app.*
+import android.content.ComponentName
 import android.content.Intent
 import android.graphics.Bitmap
 import android.media.session.MediaSession
+import android.media.session.PlaybackState
 import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
 import android.support.v4.media.MediaBrowserCompat
+import android.support.v4.media.MediaDescriptionCompat
+import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
+import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
+import android.webkit.WebView
 import androidx.media.AudioAttributesCompat
 import androidx.media.MediaBrowserServiceCompat
 import com.google.android.exoplayer2.MediaItem
@@ -17,6 +23,7 @@ import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.audio.AudioAttributes
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
+import com.google.android.exoplayer2.ext.mediasession.TimelineQueueNavigator
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import kotlinx.coroutines.CoroutineScope
@@ -36,6 +43,7 @@ class AudioService2: MediaBrowserServiceCompat() {
     private lateinit var mediaSession: MediaSessionCompat
     private lateinit var mediaSessionConnector: MediaSessionConnector
     private lateinit var playerNotificationManager: PlayerNotificationManager
+    private lateinit var mediaController: MediaControllerCompat
 
     private fun initializePlayer(URL: String) {
         val activityIntent = packageManager?.getLaunchIntentForPackage(packageName)?.let{
@@ -43,8 +51,21 @@ class AudioService2: MediaBrowserServiceCompat() {
         }
         mediaSession = MediaSessionCompat(this, SERVICE_TAG).apply {
             setSessionActivity(activityIntent)
+            setCallback(object : MediaSessionCompat.Callback() {
+                override fun onPlay() {
+                    Log.d(SERVICE_TAG, "onPlay Callback fired")
+//            super.onPlay()
+                }
+
+                override fun onStop() {
+                    super.onStop()
+                }
+            })
             isActive = true
         }
+        mediaController = MediaControllerCompat(this, mediaSession)
+        mediaController.registerCallback(mediaControllerCallback)
+//        MediaControllerCompat.setMediaController(this, mediaController)
         player = SimpleExoPlayer.Builder(this).build()
         sessionToken = mediaSession.sessionToken
         val media = MediaItem.Builder()
@@ -112,18 +133,37 @@ class AudioService2: MediaBrowserServiceCompat() {
                     } else {
                         stopForeground(false)
                     }
+//                    MediaSessionConnector.PlaybackPreparer.ACTIONS
                     Log.d(SERVICE_TAG, "notification posted")
                 }
             }
-
-
         )
+
         playerNotificationManager.setSmallIcon(R.drawable.ic_launcher_foreground)
         playerNotificationManager.setPlayer(player)
         playerNotificationManager.setMediaSessionToken(sessionToken!!)
         mediaSessionConnector = MediaSessionConnector(mediaSession)
         mediaSessionConnector.setPlayer(player)
+        mediaSessionConnector.setQueueNavigator(object : TimelineQueueNavigator(mediaSession){
+            override fun getMediaDescription(
+                player: Player,
+                windowIndex: Int
+            ): MediaDescriptionCompat {
+                return MediaDescriptionCompat.Builder()
+                    .setTitle("test")
+                    .build()
+            }
+        })
+
     }
+
+    private val mediaControllerCallback = object : MediaControllerCompat.Callback(){
+        override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
+            Log.d(SERVICE_TAG,"Playback State" + state.toString())
+            super.onPlaybackStateChanged(state)
+        }
+    }
+
     // LIFECYCLE METHODS
     override fun onCreate() {
         Log.d(SERVICE_TAG, "has started running")
@@ -157,6 +197,7 @@ class AudioService2: MediaBrowserServiceCompat() {
         mediaSessionConnector.setPlayer(null)
         player.release()
         serviceScope.cancel()
+        mediaController.unregisterCallback(mediaControllerCallback)
         Log.d(SERVICE_TAG, "has stopped running")
         super.onDestroy()
     }
