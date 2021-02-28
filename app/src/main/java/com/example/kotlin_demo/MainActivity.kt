@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setSupportActionBar(findViewById(R.id.toolbar))
         val webView = findViewById<WebView>(R.id.webView)
-
+        test = webView
         webView.webViewClient = WebViewClient()
 
         webView.settings.javaScriptEnabled = true
@@ -188,6 +188,17 @@ class MainActivity : AppCompatActivity() {
         }
 
 
+    }
+
+    companion object {
+        lateinit var test: WebView
+        fun UpdateAudioState(state:String) {
+        // Changes on the webview have to happen on the same thread as the UI
+        // https://stackoverflow.com/questions/22607657/webview-methods-on-same-thread-error
+           test.post(Runnable {
+               test.evaluateJavascript("javascript: updateAudioState('$state')",null)
+           })
+        }
     }
 
 }

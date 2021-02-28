@@ -14,7 +14,7 @@ class AudioIntentService: IntentService("AudioIntentService") {
         private lateinit var instance: AudioIntentService
         var isRunning = false
         fun stopService() {
-            Log.d(SERVICE_TAG, "Is stopping")
+            Log.d(SERVICE_TAG, "is stopping...")
             isRunning = false
             instance.stopSelf()
         }
@@ -22,6 +22,7 @@ class AudioIntentService: IntentService("AudioIntentService") {
 
     override fun onHandleIntent(intent: Intent?) {
         try {
+            Log.d(SERVICE_TAG,"is running...")
             isRunning = true
         } catch (e: InterruptedException) {
             Thread.currentThread().interrupt()

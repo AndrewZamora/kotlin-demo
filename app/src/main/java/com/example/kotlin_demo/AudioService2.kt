@@ -159,6 +159,7 @@ class AudioService2: MediaBrowserServiceCompat() {
 
     private val mediaControllerCallback = object : MediaControllerCompat.Callback(){
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
+            MainActivity.UpdateAudioState(state.toString())
             Log.d(SERVICE_TAG,"Playback State" + state.toString())
             super.onPlaybackStateChanged(state)
         }

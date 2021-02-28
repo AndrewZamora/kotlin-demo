@@ -23,6 +23,7 @@
             </intent-filter>
         </activity>
 <!--        <service android:name=".AudioPlayer"/>-->
+        <service android:name=".AudioIntentService"/>
         <service android:name=".AudioService2">
             <intent-filter>
                 <action android:name="android.media.browse.AudioSerice2" />

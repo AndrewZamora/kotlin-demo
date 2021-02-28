@@ -9,10 +9,12 @@ import android.webkit.JavascriptInterface
 import android.webkit.WebView
 
 class JSBridge(private val activity: MainActivity ) {
-    private var mediaPlayer : MediaPlayer? = null
-
     @JavascriptInterface
     fun playAudioFromUrl(URL:String) {
+//        Intent(activity,AudioIntentService::class.java).also { intent ->
+//            intent.putExtra("URL", URL)
+//            activity.startService(intent)
+//        }
         Intent(activity, AudioService2::class.java).also {
             it.putExtra("URL", URL)
             it.putExtra("ACTION", "play")
@@ -40,10 +42,11 @@ class JSBridge(private val activity: MainActivity ) {
 
     @JavascriptInterface
     fun stopAudio() {
-        Intent(activity, MediaPlaybackServiceTest::class.java).also {
-            it.putExtra("ACTION", "stop")
-            activity.stopService(it)
-        }
+        AudioIntentService.stopService()
+//        Intent(activity, MediaPlaybackServiceTest::class.java).also {
+//            it.putExtra("ACTION", "stop")
+//            activity.stopService(it)
+//        }
 //        Intent(activity, AudioPlayer::class.java).also {
 //            activity.stopService(it)
 //        }
