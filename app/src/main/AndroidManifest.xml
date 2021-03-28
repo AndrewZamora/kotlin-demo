@@ -24,9 +24,10 @@
         </activity>
 <!--        <service android:name=".AudioPlayer"/>-->
         <service android:name=".AudioIntentService"/>
-        <service android:name=".AudioService2">
+<!--        <service android:name=".AudioService3"/>-->
+        <service android:name=".AudioService3">
             <intent-filter>
-                <action android:name="android.media.browse.AudioSerice2" />
+                <action android:name="android.media.browse.AudioSerice3" />
             </intent-filter>
         </service>
         <receiver android:name="androidx.media.session.MediaButtonReceiver">

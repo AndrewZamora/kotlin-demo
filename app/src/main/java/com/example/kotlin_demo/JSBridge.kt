@@ -11,30 +11,16 @@ import android.webkit.WebView
 class JSBridge(private val activity: MainActivity ) {
     @JavascriptInterface
     fun playAudioFromUrl(URL:String) {
-//        Intent(activity,AudioIntentService::class.java).also { intent ->
-//            intent.putExtra("URL", URL)
-//            activity.startService(intent)
-//        }
-        Intent(activity, AudioService2::class.java).also {
+        Intent(activity, AudioService3::class.java).also {
             it.putExtra("URL", URL)
             it.putExtra("ACTION", "play")
             activity.startForegroundService(it)
         }
-//        Intent(activity, MediaPlaybackServiceTest::class.java).also {
-//            it.putExtra("URL", URL)
-//            it.putExtra("ACTION", "play")
-//            activity.startService(it)
-//        }
-//        Intent(activity, AudioPlayer::class.java).also {
-//            it.putExtra("URL", URL)
-//            it.putExtra("ACTION", "play")
-//            activity.startService(it)
-//        }
     }
 
     @JavascriptInterface
     fun pauseAudio() {
-        Intent(activity, AudioPlayer::class.java).also {
+        Intent(activity, AudioService3::class.java).also {
             it.putExtra("ACTION", "pause")
             activity.startService(it)
         }
